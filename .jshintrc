@@ -1,4 +1,5 @@
 {
-  "esnext": "true",
-  "moz": "true"
+  "esnext": true,
+  "moz": true,
+  "node": true
 }

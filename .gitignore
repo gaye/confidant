@@ -10,6 +10,7 @@ node_modules
 /test/fixtures/config_filter/random-copy
 /test/fixtures/config_filter/one/random-copy
 /test/fixtures/config_filter/other/random-copy
+/test/fixtures/env/success
 /test/fixtures/multiple-output/a
 /test/fixtures/multiple-output/b
 /test/fixtures/rjs/app.js

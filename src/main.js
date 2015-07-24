@@ -21,16 +21,22 @@ parser.addArgument(['--exclude'], {
   defaultValue: 'bower_components,node_modules'
 });
 
-module.exports = function main(args=parser.parseArgs()) {
+module.exports = function main(args = parser.parseArgs()) {
   let dir = args.dir;
   let readerOpts = {};
   let exclude = args.exclude;
+
   if (exclude) {
     readerOpts.exclude = exclude.split(',');
   }
 
   let reader = new FindStream(dir, readerOpts);
   let writer = createWriteStream(`${dir}/build.ninja`);
-  reader.pipe(new NinjaStream()).pipe(writer);
+  let ninja = new NinjaStream();
+
+  reader
+    .pipe(ninja)
+    .pipe(writer);
+
   return new Promise(resolve => writer.on('finish', resolve));
 };

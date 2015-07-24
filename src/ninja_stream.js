@@ -1,8 +1,8 @@
 /**
  * @fileoverview A stream that reads in confidant's configuration files
- *     and writes out ninja build rules.
+ *               and writes out ninja build rules.
  */
-let Readable = require('stream').Readable;
+
 let Transform = require('stream').Transform;
 let debug = require('debug')('confidant/ninja_stream');
 let dirname = require('path').dirname;
@@ -20,8 +20,8 @@ function NinjaStream() {
 # more configure.js files.
 `);
 }
+
 inherits(NinjaStream, Transform);
-module.exports = NinjaStream;
 
 NinjaStream.prototype._transform = function(file, encoding, done) {
   debug(`Parsing ${file}`);
@@ -40,7 +40,9 @@ NinjaStream.prototype._transform = function(file, encoding, done) {
 NinjaStream.prototype._syncTransform = function(file, encoding, tasks, done) {
   let contents = readFileSync(file);
   let dir = dirname(file);
+
   debug(`Checking ${file}... found ${tasks.length} tasks`);
+
   tasks.forEach(task => {
     let rule = `rule-${this.id++}`;
     let js = task.rule.toString();  // Function.prototype.toString
@@ -68,7 +70,7 @@ NinjaStream.prototype._syncTransform = function(file, encoding, tasks, done) {
 
     this.push(`
 rule ${rule}
-  command = cd ${dir} && node -e "${cmd}"
+  command = cd ${dir} && ${envToString(process.env)} node -e "${cmd}"
 
 build ${outputs}: ${rule} ${inputs.join(' ')}
 `);
@@ -88,3 +90,15 @@ NinjaStream.prototype._asyncTransform = function(file, encoding, RuleStream, don
 function ninjaEscape(str) {
   return str.replace(new RegExp('\\$', 'g'), '$$$$');
 }
+
+function envToString(env) {
+  let str = '';
+
+  for (let key in env) {
+    str += `${key}='${env[key]}' `;
+  }
+
+  return str.trim();
+}
+
+module.exports = NinjaStream;

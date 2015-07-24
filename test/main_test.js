@@ -59,12 +59,23 @@ let testCases = [
         `${dir}/d`
       ].map(checkExists));
     }
+  },
+  {
+    name: 'passing environment variables',
+    dir: `${__dirname}/fixtures/env`,
+    verify: function() {
+      let dir = this.dir;
+      return Promise.all([
+        `${dir}/success`
+      ].map(checkExists));
+    }
   }
 ];
 
 suite('main', function() {
   testCases.forEach(testCase => {
     test(testCase.name, function() {
+      process.env.ENV_TEST = 1;
       let dir = testCase.dir;
       let execOpts = { cwd: dir, env: process.env };
       return exec('npm install', execOpts)
