@@ -25,7 +25,11 @@ module.exports = NinjaStream;
 
 NinjaStream.prototype._transform = function(file, encoding, done) {
   debug(`Parsing ${file}`);
-  let build = require(file);
+  let dir = dirname(file);
+  let prev = process.cwd();
+  process.chdir(dir);
+  let build = require(`${dir}/configure.js`);
+  process.chdir(prev);
   if (Array.isArray(build)) {
     debug('Build config sync');
     this._syncTransform(file, encoding, build, done);
