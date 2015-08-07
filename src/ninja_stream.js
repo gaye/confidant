@@ -112,7 +112,9 @@ function envToString(env) {
   let str = '';
 
   for (let key in env) {
-    str += `${envEscape(key)}='${envEscape(env[key])}' `;
+    if (key.indexOf('npm_') !== 0) {
+      str += `${envEscape(key)}='${envEscape(env[key])}' `;
+    }
   }
 
   return str.trim();
