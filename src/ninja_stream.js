@@ -8,6 +8,7 @@ let debug = require('debug')('confidant/ninja_stream');
 let dirname = require('path').dirname;
 let envToString = require('./escape').envToString;
 let inherits = require('util').inherits;
+let ninjaEscape = require('./escape').ninjaEscape;
 let rule = require('./rule');
 let streamToArray = require('./stream_to_array');
 
@@ -42,11 +43,13 @@ NinjaStream.prototype._transform = async function(file, encoding, done) {
 
 NinjaStream.prototype._syncTransform = function(file, encoding, tasks, done) {
   tasks.forEach((task, index) => {
+    let inputs = rule.getInputs(file, task);
+    let outputs = rule.getOutputs(file, task, inputs);
     this._createRule(
-      rule.getOutputs(file, task),
-      rule.getInputs(file, task),
+      outputs,
+      inputs,
       dirname(file),
-      `(function() { require('./configure')[${index}].rule(); })();`
+      `(function() { require('./configure')[${index}].rule(${JSON.stringify(inputs)}, ${JSON.stringify(outputs)}); })();`
     );
   });
 
@@ -57,11 +60,13 @@ NinjaStream.prototype._syncTransform = function(file, encoding, tasks, done) {
 NinjaStream.prototype._asyncTransform = async function(file, encoding, RuleStream, done) {
   let tasks = await chdir(dirname(file), () => streamToArray(new RuleStream()));
   tasks.forEach((task, index) => {
+    let inputs = rule.getInputs(file, task);
+    let outputs = rule.getOutputs(file, task, inputs);
     this._createRule(
-      rule.getOutputs(file, task),
-      rule.getInputs(file, task),
+      outputs,
+      inputs,
       dirname(file),
-      `(function() { var Stream = require('./configure'); var tasks = []; var stream = new Stream(); stream.on('data', function(rule) { tasks.push(rule); }); stream.on('end', function() { tasks[${index}].rule(); }); })();`
+      `(function() { var Stream = require('./configure'); var tasks = []; var stream = new Stream(); stream.on('data', function(rule) { tasks.push(rule); }); stream.on('end', function() { tasks[${index}].rule(${JSON.stringify(inputs)}, ${JSON.stringify(outputs)}); }); })();`
     );
   });
 
@@ -70,6 +75,7 @@ NinjaStream.prototype._asyncTransform = async function(file, encoding, RuleStrea
 };
 
 NinjaStream.prototype._createRule = function(outputs, inputs, dir, cmd) {
+  cmd = ninjaEscape(cmd);
   let id = this.id++;
   this.push(`
 rule rule-${id}

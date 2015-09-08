@@ -65,9 +65,15 @@ let testCases = [
     dir: `${__dirname}/fixtures/env`,
     verify: function() {
       let dir = this.dir;
-      return Promise.all([
-        `${dir}/success`
-      ].map(checkExists));
+      return checkExists(`${dir}/success`);
+    }
+  },
+  {
+    name: 'functions',
+    dir: `${__dirname}/fixtures/functions`,
+    verify: function() {
+      let dir = this.dir;
+      return checkExists(`${dir}/a.js`);
     }
   }
 ];
