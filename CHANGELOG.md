@@ -1,3 +1,8 @@
+### 0.6.0
+
++ Confidant now allows outputs to be specified with a function that
+  takes expanded inputs array
+
 ### 0.5.0
 
 + Confidant no longer serializes your `configure.js` and instead loads
