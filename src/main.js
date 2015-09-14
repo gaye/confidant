@@ -1,3 +1,5 @@
+require('babel/polyfill');
+
 let ArgumentParser = require('argparse').ArgumentParser;
 let FindStream = require('./find_stream');
 let NinjaStream = require('./ninja_stream');
